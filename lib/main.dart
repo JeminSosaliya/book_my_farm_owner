@@ -1,0 +1,128 @@
+import 'dart:developer';
+import 'package:book_my_farm_owner/core/notification/notification.dart';
+import 'package:book_my_farm_owner/features/bookings/bookings_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'core/models/farm_house.dart';
+import 'core/providers/auth_provider.dart';
+import 'core/providers/profile_provider.dart';
+import 'core/providers/farm_provider.dart';
+import 'core/providers/booking_provider.dart';
+import 'core/providers/blocked_dates_provider.dart';
+import 'core/theme/app_theme.dart';
+import 'features/auth/login_screen.dart';
+import 'features/auth/verify_otp_screen.dart';
+import 'features/splash/splash_screen.dart';
+import 'features/dashboard/dashboard_screen.dart';
+import 'features/bookings/booking_details_screen.dart';
+import 'features/block_dates/block_dates_screen.dart';
+import 'firebase.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if(message.notification !=null){
+    log('Handling a background message: ${message.notification!.title} - ${message.notification!.body}');
+    await Firebase.initializeApp();
+  }
+}
+
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('gu'), Locale('hi')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      startLocale: const Locale('gu'),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    log('MyHomePage Init State');
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => FarmProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
+        ChangeNotifierProvider(create: (_) => BlockedDatesProvider()),
+      ],
+      child: ScreenUtilInit(
+        designSize: const Size(375, 812),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp(
+            title: 'Farm House Owner',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            initialRoute: '/',
+            onGenerateRoute: (settings) {
+              switch (settings.name) {
+                case '/':
+                  return MaterialPageRoute(
+                    builder: (_) => const SplashScreen(),
+                  );
+                case '/login':
+                  return MaterialPageRoute(
+                    builder: (_) => const LoginScreen(),
+                  );
+                case '/verify-otp':
+                  final mobileNumber = settings.arguments as String;
+                  return MaterialPageRoute(
+                    builder: (_) => VerifyOtpScreen(
+                      mobileNumber: mobileNumber,
+                    ),
+                  );
+                case '/home':
+                  return MaterialPageRoute(
+                    builder: (_) => const DashboardScreen(),
+                  );
+                case '/bookings':
+                  return MaterialPageRoute(
+                    builder: (_) => const BookingsScreen(),
+                  );
+                case '/block-dates':
+                  Map? args = settings.arguments as Map<String, dynamic>?;
+                  return MaterialPageRoute(
+                    builder: (_) => BlockDatesScreen(
+                      farmhouseid: args?['farmhouseid'] ?? "",
+                      farmName: args?['name'] ?? "",
+                      timings: Timings.fromJson(args?['timings'] ?? {}),
+                    ),
+                  );
+                case '/booking-details':
+                  final bookingId = settings.arguments as String;
+                  return MaterialPageRoute(
+                    builder: (_) => BookingDetailsScreen(bookingId: bookingId),
+                  );
+                default:
+                  return MaterialPageRoute(
+                    builder: (_) => const SplashScreen(),
+                  );
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+}

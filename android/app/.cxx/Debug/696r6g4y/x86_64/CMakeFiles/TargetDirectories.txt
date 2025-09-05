@@ -1,0 +1,2 @@
+E:/book_my_farm_owner/android/app/.cxx/Debug/696r6g4y/x86_64/CMakeFiles/edit_cache.dir
+E:/book_my_farm_owner/android/app/.cxx/Debug/696r6g4y/x86_64/CMakeFiles/rebuild_cache.dir

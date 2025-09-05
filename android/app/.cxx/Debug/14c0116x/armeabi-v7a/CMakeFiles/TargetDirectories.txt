@@ -1,0 +1,2 @@
+/Users/dhruvi/project/book_my_farm_owner/android/app/.cxx/Debug/14c0116x/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/dhruvi/project/book_my_farm_owner/android/app/.cxx/Debug/14c0116x/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "753121304941",
+    "project_id": "bookmyfarm-3531e",
+    "storage_bucket": "bookmyfarm-3531e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753121304941:android:becc157a0f770cc15dfa64",
+        "android_client_info": {
+          "package_name": "com.app.book_my_farm_owner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBda-Bt2ULr9yriyArl5FjaKngP6Doweh0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753121304941:android:36a4fa87b7674f3c5dfa64",
+        "android_client_info": {
+          "package_name": "com.book.my.farm.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBda-Bt2ULr9yriyArl5FjaKngP6Doweh0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753121304941:android:e015c8ac202739645dfa64",
+        "android_client_info": {
+          "package_name": "com.book.my.farm.user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBda-Bt2ULr9yriyArl5FjaKngP6Doweh0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

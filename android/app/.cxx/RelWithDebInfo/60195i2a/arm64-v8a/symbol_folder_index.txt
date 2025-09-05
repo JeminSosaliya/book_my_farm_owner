@@ -1,0 +1,1 @@
+C:\book_my_farm_owner\build\app\intermediates\cxx\RelWithDebInfo\60195i2a\obj\arm64-v8a
