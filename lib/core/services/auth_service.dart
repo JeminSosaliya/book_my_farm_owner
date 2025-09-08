@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:book_my_farm_owner/core/config/api_config.dart';
+import 'package:book_my_farm_owner/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../notification/notification.dart';
 
 class AuthService {
-  static const String baseUrl = ApiConfig.baseUrl;
   static const String _tokenKey = 'auth_token';
   static const String _userIdKey = 'user_id';
   static const String _isVerifiedKey = 'is_verified';
@@ -17,12 +17,12 @@ class AuthService {
   Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/send-otp'),
+        Uri.parse('$baseUrlGlobal/auth/send-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'mobileNumber': mobileNumber}),
       );
 
-      log("Send Otp URL : ${ApiConfig.baseUrl}/auth/send-otp");
+      log("Send Otp URL : $baseUrlGlobal/auth/send-otp");
       print("login send otp body: $mobileNumber");
       print("login send otp status code: ${response.statusCode}");
       print("login send otp body: ${response.body}");
@@ -43,7 +43,7 @@ class AuthService {
       // log("fcmToken ========================================== $fcmToken");
       // if (fcmToken == null) throw Exception('FCM token not found in SharedPreferences');
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/verify-otp'),
+        Uri.parse('$baseUrlGlobal/auth/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'mobileNumber': mobileNumber,
@@ -52,7 +52,7 @@ class AuthService {
         }),
       );
 
-      log("Verify Otp URL : ${ApiConfig.baseUrl}/auth/verify-otp");
+      log("Verify Otp URL : $baseUrlGlobal/auth/verify-otp");
       print("login verify otp body: $mobileNumber");
       print("login verify otp status code: ${response.statusCode}");
       print("login verify otp body: ${response.body}");
@@ -107,10 +107,10 @@ class AuthService {
         print("getProfile: No token found");
         throw Exception('No token found');
       }
-      log("URL :- $baseUrl/dashboard/profile");
+      log("URL :- $baseUrlGlobal/dashboard/profile");
       print("getProfile: Making API call with token: $token");
       final response = await http.get(
-        Uri.parse('$baseUrl/dashboard/profile'),
+        Uri.parse('$baseUrlGlobal/dashboard/profile'),
         headers: {
           'accept': 'application/json',
           'Authorization': 'Bearer $token',

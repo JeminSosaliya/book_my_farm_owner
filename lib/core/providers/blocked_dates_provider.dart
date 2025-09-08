@@ -207,6 +207,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../generated/locale_keys.g.dart';
+import '../../main.dart';
 import '../config/api_config.dart';
 import '../models/block_all_dates.dart';
 import '../models/blocked_date.dart';
@@ -272,7 +273,7 @@ class BlockedDatesProvider with ChangeNotifier {
       };
 
       final uri = Uri.parse(
-        'https://farmhouseapi.onrender.com/farm-owner/dashboard/farm-houses/682343f204e68a34c123d638/blocked-dates',
+        '$baseUrlGlobal/dashboard/farm-houses/682343f204e68a34c123d638/blocked-dates',
       ).replace(queryParameters: queryParams);
 
       // log the final link
@@ -383,7 +384,7 @@ final dates  =  _getDatesBetween(parsedDate.first, parsedDate.last);
     try {
       final token = await getToken();
       final uri = Uri.parse(
-          '${ApiConfig.baseUrl}/dashboard/farm-houses/682343f204e68a34c123d638/blocked-dates');
+          '$baseUrlGlobal/dashboard/farm-houses/682343f204e68a34c123d638/blocked-dates');
       print(
           "id is $farmhouseid dates is $dates and reason is $reason and token is $token");
       final response = await http.post(

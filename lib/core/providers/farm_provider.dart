@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../../main.dart';
 import '../models/farm_house.dart';
 import '../models/booking_analytics.dart';
 import '../config/api_config.dart';
@@ -43,14 +44,14 @@ class FarmProvider with ChangeNotifier {
     try {
       final token = await getToken();
       final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/dashboard/farm-houses'),
+        Uri.parse('$baseUrlGlobal/dashboard/farm-houses'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
 
-      log("FARM HOUSE URL : ${ApiConfig.baseUrl}/dashboard/farm-houses");
+      log("FARM HOUSE URL : $baseUrlGlobal/dashboard/farm-houses");
       log("FARM STATUS CODE: ${response.statusCode}");
       log("FARM RESPONSE: ${response.body}");
 
@@ -99,13 +100,13 @@ class FarmProvider with ChangeNotifier {
     try {
       final token = await getToken();
       final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/dashboard/booking-analytics'),
+        Uri.parse('$baseUrlGlobal/dashboard/booking-analytics'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
-      log("ANALYTICS STATUS URL : ${ApiConfig.baseUrl}/dashboard/booking-analytics");
+      log("ANALYTICS STATUS URL : $baseUrlGlobal/dashboard/booking-analytics");
       log("ANALYTICS STATUS CODE: ${response.statusCode}");
       log("ANALYTICS RESPONSE: ${response.body}");
 

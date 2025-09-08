@@ -419,6 +419,10 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
         backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         elevation: 2,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())

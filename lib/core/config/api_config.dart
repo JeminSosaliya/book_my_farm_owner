@@ -1,5 +1,4 @@
 class ApiConfig {
-  static const String baseUrl = 'https://farmhouseapi.onrender.com/farm-owner';
   static String? _token;
 
   static String get token => _token ?? '';

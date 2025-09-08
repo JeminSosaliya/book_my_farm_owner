@@ -44,7 +44,7 @@ class CodegenLoader extends AssetLoader{
   "resend_otp_in_timer_seconds": "Resend OTP in {} seconds",
   "failed_to_verify_otp": "Failed to verify OTP",
   "failed_to_resend_otp": "Failed to resend OTP",
-  "block_dates_screen_title": "Block Dates - {}",
+  "block_dates_screen_title": "Block Dates  {}",
   "select_dates": "Select Dates",
   "select_date_range": "Select Date Range",
   "select_reason": "Select Reason",

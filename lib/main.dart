@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'config_service.dart';
 import 'core/models/farm_house.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/profile_provider.dart';
@@ -21,6 +22,7 @@ import 'features/dashboard/dashboard_screen.dart';
 import 'features/bookings/booking_details_screen.dart';
 import 'features/block_dates/block_dates_screen.dart';
 import 'firebase.dart';
+String baseUrlGlobal  = "";
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -36,6 +38,19 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await ConfigService.getBaseUrl().then((url){
+    if (url != null && url.isNotEmpty) {
+      baseUrlGlobal = url;
+      log('Base URL from Firestore: $baseUrlGlobal');
+    } else {
+      baseUrlGlobal = 'https://farmhouseapi-2ktx.onrender.com';
+      log('Using default Base URL: $baseUrlGlobal');
+    }
+  }).catchError((error) {
+    baseUrlGlobal = 'https://farmhouseapi-2ktx.onrender.com';
+    log('Error fetching Base URL, using default: $baseUrlGlobal. Error: $error');
+  });
+
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   runApp(
     EasyLocalization(

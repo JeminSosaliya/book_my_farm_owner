@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../main.dart';
 import '../models/booking.dart';
 import '../config/api_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,7 +80,7 @@ class BookingProvider with ChangeNotifier {
         _statusFilter = status;
       }
 
-      final uri = Uri.parse('${ApiConfig.baseUrl}/dashboard/bookings')
+      final uri = Uri.parse('$baseUrlGlobal/dashboard/bookings')
           .replace(queryParameters: queryParams);
 
       final response = await http.get(
@@ -90,7 +91,7 @@ class BookingProvider with ChangeNotifier {
         },
       );
 
-      log("Bookings Url :- ${ApiConfig.baseUrl}/dashboard/bookings");
+      log("Bookings Url :- $baseUrlGlobal/dashboard/bookings");
       log("booking provider ${response.statusCode}");
       log("booking provider ${response.body}");
 
@@ -163,7 +164,7 @@ class BookingProvider with ChangeNotifier {
     try {
       final token = await getToken();
       final uri =
-          Uri.parse('${ApiConfig.baseUrl}/dashboard/bookings/$bookingId');
+          Uri.parse('$baseUrlGlobal/dashboard/bookings/$bookingId');
 
       final response = await http.get(
         uri,
@@ -173,7 +174,7 @@ class BookingProvider with ChangeNotifier {
         },
       );
 
-      log("Single Booking Details Url :- ${ApiConfig.baseUrl}/dashboard/bookings/$bookingId");
+      log("Single Booking Details Url :- $baseUrlGlobal/dashboard/bookings/$bookingId");
       log("Booking Provider Details ${response.statusCode}");
       log("Booking Provider Details ${response.body}");
 

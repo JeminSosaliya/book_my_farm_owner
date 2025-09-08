@@ -407,24 +407,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return Container(
-                        height: 200.h,
-                        color: Colors.grey[200],
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: AppColors.primaryColor,
+
+                      return Center(
+                        child: SizedBox(
+                          height: 200.h,
+                          width: double.infinity,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Image itself
+                              Image.network(
+                                getImageUrl(farm.media.images.first),
+                                height: 200.h,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child; // Image loaded
+                                  return SizedBox.shrink(); // Hide Image while loading
+                                },
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.grey[300],
+                                  child: Icon(Icons.broken_image, size: 40.sp, color: Colors.grey),
+                                ),
+                              ),
+
+                              // Loader overlay
+                              Positioned.fill(
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
+                        )
+                        ,
                       );
                     },
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 200.h,
-                      color: Colors.grey[300],
-                      child: Icon(Icons.broken_image, size: 40.sp, color: Colors.grey),
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Icon(
+                        Icons.broken_image,
+                        size: 40.sp,
+                        color: Colors.grey,
+                      ),
                     ),
                   )
                       : Container(
@@ -605,14 +631,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Ink(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryColor.withOpacity(0.9), AppColors.primaryColor],
+            colors: [AppColors.primaryColor.withValues(alpha: 0.9), AppColors.primaryColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryColor.withOpacity(0.25),
+              color: AppColors.primaryColor.withValues(alpha: 0.25),
               blurRadius: 6,
               offset: Offset(0, 3),
             ),
@@ -637,7 +663,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
+                  overflow: TextOverflow.ellipsis,
+
                 ),
+                maxLines: 1,
               ),
             ],
           ),
