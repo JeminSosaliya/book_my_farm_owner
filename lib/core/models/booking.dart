@@ -36,14 +36,18 @@ class Booking {
       user: UserInfo.fromJson(json['userId'] ?? {}),
       farmId: json['farmId'] ?? '',
       farmName: json['farmName'] ?? '',
-      checkIn: DateTime.parse(json['checkIn']['date'] ?? DateTime.now().toIso8601String()),
-      checkOut: DateTime.parse(json['checkOut']['date'] ?? DateTime.now().toIso8601String()),
+      checkIn: DateTime.parse(
+          json['checkIn']['date'] ?? DateTime.now().toIso8601String()),
+      checkOut: DateTime.parse(
+          json['checkOut']['date'] ?? DateTime.now().toIso8601String()),
       numberOfGuests: json['numberOfGuests'] ?? 0,
       payment: PaymentInfo.fromJson(json['payment'] ?? {}),
       specialRequest: json['specialRequest'] ?? '',
       status: json['status'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
 }
@@ -95,4 +99,4 @@ class PaymentInfo {
       transactionId: json['transactionId'] ?? '',
     );
   }
-} 
+}

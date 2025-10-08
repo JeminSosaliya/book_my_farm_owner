@@ -39,39 +39,40 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   @override
   void dispose() {
-    _otpController.dispose(); // Proper disposal of controller
+    _otpController.dispose();
     super.dispose();
   }
 
   void _startTimer() {
-    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!mounted) return;
-
-      if (_timer > 0) {
-        setState(() {
-          _timer--;
-        });
-      } else {
-        setState(() {
-          _canResend = true;
-        });
-        _countdownTimer?.cancel(); // stop the timer
-      }
-    });
+    _countdownTimer = Timer.periodic(
+      Duration(seconds: 1),
+      (Timer timer) {
+        if (!mounted) return;
+        if (_timer > 0) {
+          setState(() {
+            _timer--;
+          });
+        } else {
+          setState(() {
+            _canResend = true;
+          });
+          _countdownTimer?.cancel();
+        }
+      },
+    );
   }
 
   Future<void> _verifyOtp() async {
-    final prefs = await SharedPreferences.getInstance();
-    final fcmToken = prefs.getString(NotificationUtils.fcmTokenKey);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? fcmToken = prefs.getString(NotificationUtils.fcmTokenKey);
     if (_otpController.text.length == 6) {
-      final authProvider = context.read<AuthProvider>();
-      final success = await authProvider.verifyOtp(
+      final AuthProvider authProvider = context.read<AuthProvider>();
+      final bool success = await authProvider.verifyOtp(
         widget.mobileNumber,
         _otpController.text,
         fcmToken ?? "",
       );
       print("FCM Token: $fcmToken");
-
       if (mounted) {
         if (success) {
           _otpController.clear();
@@ -82,7 +83,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  authProvider.error ?? LocaleKeys.failed_to_verify_otp.tr()),
+                authProvider.error ?? LocaleKeys.failed_to_verify_otp.tr(),
+              ),
               backgroundColor: AppColors.errorColor,
             ),
           );
@@ -99,8 +101,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       });
       _startTimer();
 
-      final authProvider = context.read<AuthProvider>();
-      final success = await authProvider.sendOtp(widget.mobileNumber);
+      final AuthProvider authProvider = context.read<AuthProvider>();
+      final bool success = await authProvider.sendOtp(widget.mobileNumber);
 
       if (mounted && !success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +118,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+    final AuthProvider authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -158,14 +160,13 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                   SizedBox(height: 40.h),
                   Container(
                     color: Colors.transparent,
-                    // Ensures background is transparent
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: PinCodeTextField(
                       appContext: context,
                       length: 6,
                       controller: _otpController,
-                      onChanged: (value) {},
-                      onCompleted: (value) {
+                      onChanged: (String value) {},
+                      onCompleted: (String value) {
                         if (mounted) {
                           _verifyOtp();
                         }

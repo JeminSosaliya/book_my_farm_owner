@@ -27,8 +27,10 @@ class BlockedDate {
       dates: List<String>.from(json['dates'] ?? []),
       reason: json['reason'] ?? '',
       createdBy: json['createdBy'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt:
+          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      updatedAt:
+          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
   }
-} 
+}

@@ -28,11 +28,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   Future<void> _selectDateRange(BuildContext context) async {
-    final bookingProvider = context.read<BookingProvider>();
+    final BookingProvider bookingProvider = context.read<BookingProvider>();
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2025),
-      lastDate: DateTime(2026),
+      lastDate: DateTime(2100),
       initialDateRange:
           bookingProvider.startDate != null && bookingProvider.endDate != null
               ? DateTimeRange(
@@ -51,8 +51,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   Future<void> _selectStatus(BuildContext context) async {
-    final bookingProvider = context.read<BookingProvider>();
-    final statuses = [
+    final BookingProvider bookingProvider = context.read<BookingProvider>();
+    final List<String> statuses = [
       LocaleKeys.pending.tr(),
       LocaleKeys.confirmed.tr(),
       LocaleKeys.completed.tr(),
@@ -61,7 +61,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
     await showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
+      builder: (BuildContext context) => Container(
         padding: EdgeInsets.all(16.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -259,7 +259,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bookingProvider = context.watch<BookingProvider>();
+    final BookingProvider bookingProvider = context.watch<BookingProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -357,7 +357,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 onRefresh: _loadBookings,
                 child: ListView.builder(
                   itemCount: bookingProvider.bookings.length,
-                  itemBuilder: (context, index) =>
+                  itemBuilder: (BuildContext context,int index) =>
                       _buildBookingCard(bookingProvider.bookings[index]),
                 ),
               ),

@@ -8,7 +8,9 @@ class AuthProvider extends ChangeNotifier {
   String? _error;
 
   bool get isAuthenticated => _isAuthenticated;
+
   bool get isLoading => _isLoading;
+
   String? get error => _error;
 
   Future<void> initialize() async {
@@ -31,9 +33,9 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
-
     try {
-      final response = await _authService.sendOtp(mobileNumber);
+      final Map<String, dynamic> response =
+          await _authService.sendOtp("91$mobileNumber");
       _error = null;
       return response['success'] == true;
     } catch (e) {
@@ -45,14 +47,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> verifyOtp(String mobileNumber, String otp, String fcmToken) async {
+  Future<bool> verifyOtp(
+    String mobileNumber,
+    String otp,
+    String fcmToken,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-
     try {
-      final response = await _authService.verifyOtp(mobileNumber, otp, fcmToken);
-      if (response['success'] == true && response['data'] != null && response['data']['token'] != null) {
+      final Map<String, dynamic> response = await _authService.verifyOtp(
+        "91$mobileNumber",
+        otp,
+        fcmToken,
+      );
+      if (response['success'] == true &&
+          response['data'] != null &&
+          response['data']['token'] != null) {
         _isAuthenticated = true;
         _error = null;
         return true;
@@ -72,7 +83,6 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     _isLoading = true;
     notifyListeners();
-
     try {
       await _authService.logout();
       _isAuthenticated = false;
@@ -84,4 +94,4 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-} 
+}

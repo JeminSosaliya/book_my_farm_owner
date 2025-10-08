@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:country_picker/country_picker.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -17,18 +16,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final TextEditingController _mobileController;
-  late final TextEditingController _countryCodeController;
-  String _selectedCountryCode = '+91';
-  String _selectedCountryFlag = '🇮🇳';
+  final String _selectedCountryCode = '+91';
+  final String _selectedCountryFlag = '🇮🇳';
 
   @override
   void initState() {
     NotificationUtils().init();
     super.initState();
     _mobileController = TextEditingController();
-    _countryCodeController = TextEditingController();
   }
 
   @override
@@ -37,54 +34,25 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _showCountryPicker() {
-    showCountryPicker(
-      context: context,
-      showPhoneCode: true,
-      onSelect: (Country country) {
-        setState(() {
-          _selectedCountryCode = '+${country.phoneCode}';
-          _selectedCountryFlag = country.flagEmoji;
-        });
-      },
-      searchAutofocus: true,
-      showWorldWide: false,
-      showSearch: true,
-      countryListTheme: CountryListThemeData(
-        flagSize: 25,
-        backgroundColor: Colors.white,
-        textStyle: const TextStyle(fontSize: 16),
-        borderRadius: BorderRadius.circular(12.r),
-        inputDecoration: InputDecoration(
-          labelText: LocaleKeys.search.tr(),
-          // Using localized key
-          hintText: LocaleKeys.start_typing_to_search.tr(),
-          // Using localized key
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _sendOtp() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final authProvider = context.read<AuthProvider>();
-      final fullMobileNumber = _mobileController.text;
-      final success = await authProvider.sendOtp(fullMobileNumber);
+      final AuthProvider authProvider = context.read<AuthProvider>();
+      final String fullMobileNumber = _mobileController.text;
+      final bool success = await authProvider.sendOtp(fullMobileNumber);
 
       if (mounted) {
         if (success) {
-          Navigator.pushNamed(context, '/verify-otp',
-              arguments: fullMobileNumber);
+          Navigator.pushNamed(
+            context,
+            '/verify-otp',
+            arguments: fullMobileNumber,
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  authProvider.error ?? LocaleKeys.failed_to_send_otp.tr()),
-              // Using localized key
+                authProvider.error ?? LocaleKeys.failed_to_send_otp.tr(),
+              ),
               backgroundColor: AppColors.errorColor,
             ),
           );
@@ -95,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+    final AuthProvider authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -118,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      LocaleKeys.welcome_back.tr(), // Using localized key
+                      LocaleKeys.welcome_back.tr(),
                       style: TextStyle(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
@@ -131,8 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       LocaleKeys.enter_your_mobile_number_to_continue.tr(),
                       style: TextStyle(
                         fontSize: 16.sp,
-                        color: Colors.white.withOpacity(
-                            0.9), // Changed from greyColor to white
+                        color: Colors.white.withOpacity(0.9),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -182,7 +149,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
                               hintText: LocaleKeys.mobileNumber.tr(),
-                              // Using localized key
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
@@ -191,14 +157,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               FilteringTextInputFormatter.digitsOnly,
                               LengthLimitingTextInputFormatter(10),
                             ],
-                            validator: (value) {
+                            validator: (String? value) {
                               if (value == null || value.isEmpty) {
-                                return LocaleKeys.error_empty_mobile
-                                    .tr(); // Using localized key
+                                return LocaleKeys.error_empty_mobile.tr();
                               }
                               if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-                                return LocaleKeys.error_invalid_mobile
-                                    .tr(); // Using localized key
+                                return LocaleKeys.error_invalid_mobile.tr();
                               }
                               return null;
                             },
@@ -220,7 +184,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             )
                           : Text(
-                              LocaleKeys.sendOtp.tr()), // Using localized key
+                              LocaleKeys.sendOtp.tr(),
+                            ),
                     ),
                   ],
                 ),

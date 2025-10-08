@@ -35,9 +35,15 @@ class FarmOwnerProfile {
       isActive: json['isActive'] ?? false,
       farms: List<String>.from(json['farms'] ?? []),
       fcmToken: json['fcmToken'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      lastLogin: json['lastLogin'] != null ? DateTime.parse(json['lastLogin']) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      lastLogin: json['lastLogin'] != null
+          ? DateTime.parse(json['lastLogin'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 
@@ -56,4 +62,4 @@ class FarmOwnerProfile {
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
-} 
+}

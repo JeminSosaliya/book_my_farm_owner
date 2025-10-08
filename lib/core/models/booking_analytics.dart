@@ -18,7 +18,7 @@ class BookingAnalytics {
   factory BookingAnalytics.fromJson(Map<String, dynamic> json) {
     final Map<String, FarmBookingStats> farmStats = {};
     json['bookingsByFarm']?.forEach((key, value) {
-      farmStats[key] = FarmBookingStats. fromJson(value);
+      farmStats[key] = FarmBookingStats.fromJson(value);
     });
 
     return BookingAnalytics(
@@ -123,4 +123,4 @@ class RecentBooking {
           : DateTime.now(),
     );
   }
-} 
+}

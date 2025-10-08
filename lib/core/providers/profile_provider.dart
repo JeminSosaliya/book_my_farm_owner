@@ -7,27 +7,24 @@ class ProfileProvider extends ChangeNotifier {
   FarmOwnerProfile? _profile;
   bool _isLoading = false;
   String? _error;
-
-  // Getters
   FarmOwnerProfile? get profile => _profile;
   bool get isLoading => _isLoading;
   bool get hasProfile => _profile != null;
   String? get error => _error;
 
-  // Load profile
   Future<void> loadProfile() async {
     if (_isLoading) return;
-
     await Future.microtask(() {
       _isLoading = true;
       _error = null;
       notifyListeners();
     });
-
     try {
-      final response = await _authService.getProfile();
-      if (response['success'] == true && response['data'] != null && response['data']['farmOwner'] != null) {
-        final farmOwnerData = response['data']['farmOwner'];
+      final Map<String, dynamic> response = await _authService.getProfile();
+      if (response['success'] == true &&
+          response['data'] != null &&
+          response['data']['farmOwner'] != null) {
+        final dynamic farmOwnerData = response['data']['farmOwner'];
         await Future.microtask(() {
           _profile = FarmOwnerProfile.fromJson(farmOwnerData);
           _isLoading = false;
@@ -46,18 +43,4 @@ class ProfileProvider extends ChangeNotifier {
       });
     }
   }
-
-
-  void clearProfile() {
-    _profile = null;
-    _error = null;
-    notifyListeners();
-  }
-
-  void clearError() {
-    if (_error != null) {
-      _error = null;
-      notifyListeners();
-    }
-  }
-} 
+}

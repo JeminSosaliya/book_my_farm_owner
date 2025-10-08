@@ -76,7 +76,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _buildAnalyticsTile(
                 title: LocaleKeys.total_revenue.tr(),
                 value:
-                '${LocaleKeys.currency_symbol.tr()}${(analytics?.totalRevenue ?? 0.0).toStringAsFixed(2)}',
+                    '${LocaleKeys.currency_symbol.tr()}${(analytics?.totalRevenue ?? 0.0).toStringAsFixed(2)}',
                 icon: Icons.attach_money,
                 startColor: const Color(0xFFA00239),
                 endColor: const Color(0xFFF37C9E),
@@ -257,7 +257,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   //   );
   // }
 
-
   // Widget _buildStatCard({
   //   required String title,
   //   required String value,
@@ -398,75 +397,85 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(20.r)),
                   child: farm.media.images.isNotEmpty
                       ? Image.network(
-                    getImageUrl(farm.media.images.first),
-                    height: 200.h,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-
-                      return Center(
-                        child: SizedBox(
+                          getImageUrl(farm.media.images.first),
                           height: 200.h,
                           width: double.infinity,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Image itself
-                              Image.network(
-                                getImageUrl(farm.media.images.first),
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+
+                            return Center(
+                              child: SizedBox(
                                 height: 200.h,
                                 width: double.infinity,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child; // Image loaded
-                                  return SizedBox.shrink(); // Hide Image while loading
-                                },
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  color: Colors.grey[300],
-                                  child: Icon(Icons.broken_image, size: 40.sp, color: Colors.grey),
-                                ),
-                              ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Image itself
+                                    Image.network(
+                                      getImageUrl(farm.media.images.first),
+                                      height: 200.h,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child; // Image loaded
+                                        return SizedBox
+                                            .shrink(); // Hide Image while loading
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                        color: Colors.grey[300],
+                                        child: Icon(Icons.broken_image,
+                                            size: 40.sp, color: Colors.grey),
+                                      ),
+                                    ),
 
-                              // Loader overlay
-                              Positioned.fill(
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primaryColor,
-                                  ),
+                                    // Loader overlay
+                                    Positioned.fill(
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) => Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 40.sp,
+                              color: Colors.grey,
+                            ),
                           ),
                         )
-                        ,
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) => Center(
-                      child: Icon(
-                        Icons.broken_image,
-                        size: 40.sp,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
                       : Container(
-                    height: 200.h,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.image, size: 40.sp, color: Colors.grey),
-                  ),
+                          height: 200.h,
+                          color: Colors.grey[300],
+                          child: Icon(Icons.image,
+                              size: 40.sp, color: Colors.grey),
+                        ),
                 ),
                 // Stylish badge
                 Positioned(
                   top: 12.r,
                   right: 12.r,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.r, vertical: 6.r),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.r, vertical: 6.r),
                     decoration: BoxDecoration(
-                      color: farm.status == 'active' ? Colors.green : AppColors.errorColor,
+                      color: farm.status == 'active'
+                          ? Colors.green
+                          : AppColors.errorColor,
                       borderRadius: BorderRadius.circular(30.r),
                       boxShadow: [
                         BoxShadow(
@@ -519,12 +528,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   SizedBox(height: 10.h),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 16.sp, color: Colors.grey[600]),
+                      Icon(Icons.location_on,
+                          size: 16.sp, color: Colors.grey[600]),
                       SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
                           '${farm.location.coordinates.latitude}, ${farm.location.coordinates.longitude}',
-                          style: TextStyle(fontSize: 13.sp, color: Colors.grey[700]),
+                          style: TextStyle(
+                              fontSize: 13.sp, color: Colors.grey[700]),
                         ),
                       ),
                     ],
@@ -536,15 +547,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       _buildInfoChip(
                         icon: Icons.people,
-                        text: LocaleKeys.number_guests.tr(args: ["${farm.basicInfo.capacity}"]),
+                        text: LocaleKeys.number_guests
+                            .tr(args: ["${farm.basicInfo.capacity}"]),
                       ),
                       _buildInfoChip(
                         icon: Icons.bed,
-                        text: LocaleKeys.value_bedrooms.tr(args: ["${farm.basicInfo.bedrooms}"]),
+                        text: LocaleKeys.value_bedrooms
+                            .tr(args: ["${farm.basicInfo.bedrooms+farm.basicInfo.acBedroom}"]),
                       ),
                       _buildInfoChip(
                         icon: Icons.area_chart,
-                        text: LocaleKeys.value_sq_ft.tr(args: ["${farm.basicInfo.area}"]),
+                        text: LocaleKeys.value_sq_ft
+                            .tr(args: ["${farm.basicInfo.area}"]),
                       ),
                     ],
                   ),
@@ -555,7 +569,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: _buildActionButton(
                           icon: Icons.access_alarm,
                           label: LocaleKeys.bookings.tr(),
-                          onTap: () => Navigator.pushNamed(context, '/bookings'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/bookings'),
                         ),
                       ),
                       SizedBox(width: 12.w),
@@ -567,7 +582,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             context,
                             '/block-dates',
                             arguments: {
-                              "farmhouseid": farm.farmhouseId,
+                              "farmhouseid": farm.id,
                               "farmName": farm.basicInfo.name,
                               "timings": farm.timings.toJson(),
                               // Convert Timings object to Map},
@@ -584,7 +599,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
-
   }
 
   Widget _buildInfoChip({required IconData icon, required String text}) {
@@ -631,7 +645,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Ink(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryColor.withValues(alpha: 0.9), AppColors.primaryColor],
+            colors: [
+              AppColors.primaryColor.withValues(alpha: 0.9),
+              AppColors.primaryColor
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -664,7 +681,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                   overflow: TextOverflow.ellipsis,
-
                 ),
                 maxLines: 1,
               ),
@@ -822,8 +838,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _buildAnalyticsCard(farmProvider.analytics),
                   SizedBox(height: 10.h),
                   Padding(
-                    padding:
-                        EdgeInsets.only(left: 16.r, right: 16.r, ),
+                    padding: EdgeInsets.only(
+                      left: 16.r,
+                      right: 16.r,
+                    ),
                     child: Text(
                       LocaleKeys.my_farms.tr(),
                       style: TextStyle(

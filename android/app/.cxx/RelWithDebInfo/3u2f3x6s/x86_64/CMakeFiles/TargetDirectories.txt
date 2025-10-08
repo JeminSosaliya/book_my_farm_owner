@@ -1,0 +1,2 @@
+D:/AndroidStudioProjects/farm_house_all_application_24_09_2025/book_my_farm_owner/android/app/.cxx/RelWithDebInfo/3u2f3x6s/x86_64/CMakeFiles/edit_cache.dir
+D:/AndroidStudioProjects/farm_house_all_application_24_09_2025/book_my_farm_owner/android/app/.cxx/RelWithDebInfo/3u2f3x6s/x86_64/CMakeFiles/rebuild_cache.dir

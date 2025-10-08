@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:book_my_farm_owner/core/notification/notification.dart';
 import 'package:book_my_farm_owner/features/bookings/bookings_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,23 +21,23 @@ import 'features/dashboard/dashboard_screen.dart';
 import 'features/bookings/booking_details_screen.dart';
 import 'features/block_dates/block_dates_screen.dart';
 import 'firebase.dart';
-String baseUrlGlobal  = "";
+
+String baseUrlGlobal = "";
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if(message.notification !=null){
+  if (message.notification != null) {
     log('Handling a background message: ${message.notification!.title} - ${message.notification!.body}');
     await Firebase.initializeApp();
   }
 }
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await ConfigService.getBaseUrl().then((url){
+  await ConfigService.getBaseUrl().then((url) {
     if (url != null && url.isNotEmpty) {
       baseUrlGlobal = url;
       log('Base URL from Firestore: $baseUrlGlobal');
@@ -54,10 +53,14 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('gu'), Locale('hi')],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('gu'),
+        Locale('hi'),
+      ],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
-      startLocale: const Locale('gu'),
+      startLocale: const Locale('en'),
       child: const MyApp(),
     ),
   );
@@ -71,17 +74,18 @@ class MyApp extends StatelessWidget {
     log('MyHomePage Init State');
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => FarmProvider()),
-        ChangeNotifierProvider(create: (_) => BookingProvider()),
-        ChangeNotifierProvider(create: (_) => BlockedDatesProvider()),
+        ChangeNotifierProvider(create: (BuildContext _) => AuthProvider()),
+        ChangeNotifierProvider(create: (BuildContext _) => ProfileProvider()),
+        ChangeNotifierProvider(create: (BuildContext _) => FarmProvider()),
+        ChangeNotifierProvider(create: (BuildContext _) => BookingProvider()),
+        ChangeNotifierProvider(
+            create: (BuildContext _) => BlockedDatesProvider()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
         minTextAdapt: true,
         splitScreenMode: true,
-        builder: (context, child) {
+        builder: (BuildContext context, Widget? child) {
           return MaterialApp(
             title: 'Farm House Owner',
             debugShowCheckedModeBanner: false,
@@ -90,48 +94,49 @@ class MyApp extends StatelessWidget {
             supportedLocales: context.supportedLocales,
             locale: context.locale,
             initialRoute: '/',
-            onGenerateRoute: (settings) {
+            onGenerateRoute: (RouteSettings settings) {
               switch (settings.name) {
                 case '/':
                   return MaterialPageRoute(
-                    builder: (_) => const SplashScreen(),
+                    builder: (BuildContext _) => const SplashScreen(),
                   );
                 case '/login':
                   return MaterialPageRoute(
-                    builder: (_) => const LoginScreen(),
+                    builder: (BuildContext _) => const LoginScreen(),
                   );
                 case '/verify-otp':
-                  final mobileNumber = settings.arguments as String;
+                  final String mobileNumber = settings.arguments as String;
                   return MaterialPageRoute(
-                    builder: (_) => VerifyOtpScreen(
+                    builder: (BuildContext _) => VerifyOtpScreen(
                       mobileNumber: mobileNumber,
                     ),
                   );
                 case '/home':
                   return MaterialPageRoute(
-                    builder: (_) => const DashboardScreen(),
+                    builder: (BuildContext _) => const DashboardScreen(),
                   );
                 case '/bookings':
                   return MaterialPageRoute(
-                    builder: (_) => const BookingsScreen(),
+                    builder: (BuildContext _) => const BookingsScreen(),
                   );
                 case '/block-dates':
                   Map? args = settings.arguments as Map<String, dynamic>?;
                   return MaterialPageRoute(
-                    builder: (_) => BlockDatesScreen(
-                      farmhouseid: args?['farmhouseid'] ?? "",
+                    builder: (BuildContext _) => BlockDatesScreen(
+                      farmHouseId: args?['farmhouseid'] ?? "",
                       farmName: args?['name'] ?? "",
                       timings: Timings.fromJson(args?['timings'] ?? {}),
                     ),
                   );
                 case '/booking-details':
-                  final bookingId = settings.arguments as String;
+                  final String bookingId = settings.arguments as String;
                   return MaterialPageRoute(
-                    builder: (_) => BookingDetailsScreen(bookingId: bookingId),
+                    builder: (BuildContext _) =>
+                        BookingDetailsScreen(bookingId: bookingId),
                   );
                 default:
                   return MaterialPageRoute(
-                    builder: (_) => const SplashScreen(),
+                    builder: (BuildContext _) => const SplashScreen(),
                   );
               }
             },

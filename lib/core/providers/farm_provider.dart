@@ -2,12 +2,12 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../main.dart';
 import '../models/farm_house.dart';
 import '../models/booking_analytics.dart';
-import '../config/api_config.dart';
 
 class FarmProvider with ChangeNotifier {
   List<FarmHouse> _farms = [];
@@ -28,8 +28,8 @@ class FarmProvider with ChangeNotifier {
   String? get error => _error;
 
   Future<String?> getToken() async {
-    final prefs = await _prefs;
-    final token = prefs.getString(_tokenKey);
+    final SharedPreferences prefs = await _prefs;
+    final String? token = prefs.getString(_tokenKey);
     print("getToken: $token");
     return token;
   }
@@ -42,8 +42,8 @@ class FarmProvider with ChangeNotifier {
     });
 
     try {
-      final token = await getToken();
-      final response = await http.get(
+      final String? token = await getToken();
+      final Response response = await http.get(
         Uri.parse('$baseUrlGlobal/dashboard/farm-houses'),
         headers: {
           'Content-Type': 'application/json',
@@ -98,8 +98,8 @@ class FarmProvider with ChangeNotifier {
     });
 
     try {
-      final token = await getToken();
-      final response = await http.get(
+      final String? token = await getToken();
+      final Response response = await http.get(
         Uri.parse('$baseUrlGlobal/dashboard/booking-analytics'),
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ class FarmProvider with ChangeNotifier {
       log("ANALYTICS RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final dynamic data = json.decode(response.body);
         await Future.microtask(() {
           _analytics = BookingAnalytics.fromJson(data["data"]);
           _isLoading = false;
@@ -126,21 +126,12 @@ class FarmProvider with ChangeNotifier {
         });
       }
     } catch (e) {
-
       await Future.microtask(() {
         log("ANALYTICS ERROR: $e");
         _error = 'Error fetching analytics: $e';
         _isLoading = false;
         notifyListeners();
       });
-    }
-  }
-
-  FarmHouse? getFarmById(String id) {
-    try {
-      return _farms.firstWhere((farm) => farm.id == id);
-    } catch (e) {
-      return null;
     }
   }
 }

@@ -1,22 +1,21 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:book_my_farm_owner/core/config/api_config.dart';
 import 'package:book_my_farm_owner/main.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../notification/notification.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userIdKey = 'user_id';
   static const String _isVerifiedKey = 'is_verified';
 
-  Future<SharedPreferences> get _prefs async => await SharedPreferences.getInstance();
+  Future<SharedPreferences> get _prefs async =>
+      await SharedPreferences.getInstance();
 
   Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
     try {
-      final response = await http.post(
+      final Response response = await http.post(
         Uri.parse('$baseUrlGlobal/auth/send-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'mobileNumber': mobileNumber}),
@@ -36,13 +35,13 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> verifyOtp(String mobileNumber, String otp, String fcmToken) async {
+  Future<Map<String, dynamic>> verifyOtp(
+    String mobileNumber,
+    String otp,
+    String fcmToken,
+  ) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      // final fcmToken = prefs.getString(NotificationUtils.fcmTokenKey);
-      // log("fcmToken ========================================== $fcmToken");
-      // if (fcmToken == null) throw Exception('FCM token not found in SharedPreferences');
-      final response = await http.post(
+      final Response response = await http.post(
         Uri.parse('$baseUrlGlobal/auth/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -56,22 +55,23 @@ class AuthService {
       print("login verify otp body: $mobileNumber");
       print("login verify otp status code: ${response.statusCode}");
       print("login verify otp body: ${response.body}");
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['data'] != null) {
           final token = data['data']['token'];
           final user = data['data']['user'];
-          
+
           if (token != null) {
-            final prefs = await _prefs;
+            final SharedPreferences prefs = await _prefs;
             await prefs.setString(_tokenKey, token);
             print("login verify otp token saved: $token");
-            
+
             if (user != null) {
               await prefs.setString(_userIdKey, user['id']);
               await prefs.setBool(_isVerifiedKey, user['isVerified'] ?? false);
-              print("login verify otp user data saved: ${user['id']}, ${user['isVerified']}");
+              print(
+                  "login verify otp user data saved: ${user['id']}, ${user['isVerified']}");
             }
           }
         }
@@ -86,23 +86,24 @@ class AuthService {
 
   Future<String?> getToken() async {
     final prefs = await _prefs;
-    final token = prefs.getString(_tokenKey);
+    final String? token = prefs.getString(_tokenKey);
     print("getToken: $token");
     return token;
   }
 
   Future<bool> isAuthenticated() async {
-    final prefs = await _prefs;
-    final token = prefs.getString(_tokenKey);
-    final userId = prefs.getString(_userIdKey);
-    final isVerified = prefs.getBool(_isVerifiedKey) ?? false;
-    print("isAuthenticated check - token: $token, userId: $userId, isVerified: $isVerified");
+    final SharedPreferences prefs = await _prefs;
+    final String? token = prefs.getString(_tokenKey);
+    final String? userId = prefs.getString(_userIdKey);
+    final bool isVerified = prefs.getBool(_isVerifiedKey) ?? false;
+    print(
+        "isAuthenticated check - token: $token, userId: $userId, isVerified: $isVerified");
     return token != null && userId != null && isVerified;
   }
 
   Future<Map<String, dynamic>> getProfile() async {
     try {
-      final token = await getToken();
+      final String? token = await getToken();
       if (token == null) {
         print("getProfile: No token found");
         throw Exception('No token found');
@@ -122,7 +123,9 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data['success'] == true && data['data'] != null && data['data']['farmOwner'] != null) {
+        if (data['success'] == true &&
+            data['data'] != null &&
+            data['data']['farmOwner'] != null) {
           print("getProfile: Successfully parsed farm owner data");
           return data;
         } else {
@@ -140,10 +143,10 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    final prefs = await _prefs;
+    final SharedPreferences prefs = await _prefs;
     await prefs.remove(_tokenKey);
     await prefs.remove(_userIdKey);
     await prefs.remove(_isVerifiedKey);
     print("logout: cleared all auth data");
   }
-} 
+}

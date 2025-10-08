@@ -1,3 +1,4 @@
+import 'package:book_my_farm_owner/core/models/booking.dart';
 import 'package:book_my_farm_owner/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   Future<void> _loadBookingDetails() async {
     if (!mounted) return;
-    final bookingProvider = context.read<BookingProvider>();
+    final BookingProvider bookingProvider = context.read<BookingProvider>();
     await bookingProvider.fetchBookingDetails(widget.bookingId);
   }
 
@@ -36,42 +37,6 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     context.read<BookingProvider>().clearSelectedBooking();
     super.dispose();
   }
-
-  // Widget _buildInfoRow(String label, String value, {IconData? icon}) {
-  //   return Padding(
-  //     padding: EdgeInsets.symmetric(vertical: 8.h),
-  //     child: Row(
-  //       children: [
-  //         if (icon != null) ...[
-  //           Icon(icon, size: 20.sp, color: Colors.grey),
-  //           SizedBox(width: 8.w),
-  //         ],
-  //         Expanded(
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 label,
-  //                 style: TextStyle(
-  //                   fontSize: 12.sp,
-  //                   color: Colors.grey,
-  //                 ),
-  //               ),
-  //               SizedBox(height: 4.h),
-  //               Text(
-  //                 value,
-  //                 style: TextStyle(
-  //                   fontSize: 14.sp,
-  //                   fontWeight: FontWeight.w600,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildInfoRow(String label, String value, {IconData? icon}) {
     return Padding(
@@ -105,11 +70,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     );
   }
 
-
   Widget _buildStatusChip(String status) {
     IconData icon;
     Color color;
-
     switch (status.toLowerCase()) {
       case 'pending':
         icon = Icons.hourglass_top;
@@ -177,7 +140,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     );
   }
 
-  Widget _buildPaymentInfo(booking) {
+  Widget _buildPaymentInfo(Booking? booking) {
     return _sectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,15 +162,15 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           SizedBox(height: 16.h),
           _buildInfoRow(
             LocaleKeys.total_amount.tr(),
-            '₹${booking.payment.totalAmount}',
+            '₹${booking?.payment.totalAmount ?? 0}',
           ),
           _buildInfoRow(
             LocaleKeys.security_deposit.tr(),
-            '₹${booking.payment.securityDeposit}',
+            '₹${booking?.payment.securityDeposit ?? 0}',
           ),
           _buildInfoRow(
             LocaleKeys.remaining_amount.tr(),
-            '₹${booking.payment.remainingAmount}',
+            '₹${booking?.payment.remainingAmount ?? 0}',
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -216,18 +179,18 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                 LocaleKeys.payment_status.tr(),
                 style: TextStyle(fontSize: 14.sp, color: Colors.grey),
               ),
-              _buildStatusChip(booking.payment.paymentStatus),
+              _buildStatusChip(booking?.payment.paymentStatus ?? ""),
             ],
           ),
           SizedBox(height: 8.h),
           _buildInfoRow(
             LocaleKeys.payment_method.tr(),
-            booking.payment.paymentMethod.toUpperCase(),
+            (booking?.payment.paymentMethod ?? "").toUpperCase(),
             icon: Icons.credit_card,
           ),
           _buildInfoRow(
             LocaleKeys.transaction_id.tr(),
-            booking.payment.transactionId,
+            booking?.payment.transactionId ?? "",
             icon: Icons.receipt,
           ),
         ],
@@ -237,8 +200,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bookingProvider = context.watch<BookingProvider>();
-    final booking = bookingProvider.selectedBooking;
+    final BookingProvider bookingProvider = context.watch<BookingProvider>();
+    final Booking? booking = bookingProvider.selectedBooking;
 
     return Scaffold(
       appBar: AppBar(
@@ -248,118 +211,116 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       ),
       body: bookingProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : bookingProvider.error != null
-          ? Center(
-        child: Text(
-          bookingProvider.error!,
-          style: TextStyle(
-            color: AppColors.errorColor,
-            fontSize: 16.sp,
-          ),
-        ),
-      )
+          // : bookingProvider.error != null
+          //     ? Center(
+          //         child: Text(
+          //           bookingProvider.error!,
+          //           style: TextStyle(
+          //             color: AppColors.errorColor,
+          //             fontSize: 16.sp,
+          //           ),
+          //         ),
+          //       )
           : booking == null
-          ? Center(child: Text('No booking details found'))
-          : SingleChildScrollView(
-        padding: EdgeInsets.all(16.r),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+              ? Center(child: Text(LocaleKeys.no_booking_details_found.tr()))
+              : SingleChildScrollView(
+                  padding: EdgeInsets.all(16.r),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        booking.bookingId,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
+                      _sectionCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  booking.bookingId,
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                _buildStatusChip(booking.status),
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildInfoRow(
+                              LocaleKeys.guest_name.tr(),
+                              booking.user.name,
+                              icon: Icons.person,
+                            ),
+                            _buildInfoRow(
+                              LocaleKeys.farm_name.tr(),
+                              booking.farmName,
+                              icon: Icons.home,
+                            ),
+                            _buildInfoRow(
+                              LocaleKeys.check_in_date.tr(),
+                              DateFormat('MMM dd, yyyy')
+                                  .format(booking.checkIn),
+                              icon: Icons.login,
+                            ),
+                            _buildInfoRow(
+                              LocaleKeys.check_out_date.tr(),
+                              DateFormat('MMM dd, yyyy')
+                                  .format(booking.checkOut),
+                              icon: Icons.logout,
+                            ),
+                            _buildInfoRow(
+                              LocaleKeys.number_of_guests.tr(),
+                              booking.numberOfGuests.toString(),
+                              icon: Icons.people,
+                            ),
+                            if (booking.specialRequest.isNotEmpty)
+                              _buildInfoRow(
+                                LocaleKeys.special_request.tr(),
+                                booking.specialRequest,
+                                icon: Icons.note_alt,
+                              ),
+                          ],
                         ),
                       ),
-                      _buildStatusChip(booking.status),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildInfoRow(
-                    LocaleKeys.guest_name.tr(),
-                    booking.user.name,
-                    icon: Icons.person,
-                  ),
-                  _buildInfoRow(
-                    LocaleKeys.farm_name.tr(),
-                    booking.farmName,
-                    icon: Icons.home,
-                  ),
-                  _buildInfoRow(
-                    LocaleKeys.check_in_date.tr(),
-                    DateFormat('MMM dd, yyyy')
-                        .format(booking.checkIn),
-                    icon: Icons.login,
-                  ),
-                  _buildInfoRow(
-                    LocaleKeys.check_out_date.tr(),
-                    DateFormat('MMM dd, yyyy')
-                        .format(booking.checkOut),
-                    icon: Icons.logout,
-                  ),
-                  _buildInfoRow(
-                    LocaleKeys.number_of_guests.tr(),
-                    booking.numberOfGuests.toString(),
-                    icon: Icons.people,
-                  ),
-                  if (booking.specialRequest.isNotEmpty)
-                    _buildInfoRow(
-                      LocaleKeys.special_request.tr(),
-                      booking.specialRequest,
-                      icon: Icons.note_alt,
-                    ),
-                ],
-              ),
-            ),
-            _buildPaymentInfo(booking),
-            _sectionCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.timeline,
-                          color: AppColors.primaryColor,
-                          size: 20.sp),
-                      SizedBox(width: 8.w),
-                      Text(
-                        LocaleKeys.booking_timeline.tr(),
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
+                      _buildPaymentInfo(booking),
+                      _sectionCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.timeline,
+                                    color: AppColors.primaryColor, size: 20.sp),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  LocaleKeys.booking_timeline.tr(),
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildInfoRow(
+                              LocaleKeys.created_at.tr(),
+                              DateFormat('MMM dd, yyyy hh:mm a')
+                                  .format(booking.createdAt),
+                              icon: Icons.access_time,
+                            ),
+                            _buildInfoRow(
+                              LocaleKeys.last_updated.tr(),
+                              DateFormat('MMM dd, yyyy hh:mm a')
+                                  .format(booking.updatedAt),
+                              icon: Icons.update,
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.h),
-                  _buildInfoRow(
-                    LocaleKeys.created_at.tr(),
-                    DateFormat('MMM dd, yyyy hh:mm a')
-                        .format(booking.createdAt),
-                    icon: Icons.access_time,
-                  ),
-                  _buildInfoRow(
-                    LocaleKeys.last_updated.tr(),
-                    DateFormat('MMM dd, yyyy hh:mm a')
-                        .format(booking.updatedAt),
-                    icon: Icons.update,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+                ),
     );
   }
 }

@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../services/notification_service.dart';
-
 class NotificationUtils {
-
   late AndroidNotificationChannel channel;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -23,9 +20,9 @@ class NotificationUtils {
 
   void init() async {
     channel = AndroidNotificationChannel(
-      channelId, // id
-      channelName, // title
-      description: channelDes, //// description
+      channelId,
+      channelName,
+      description: channelDes,
       importance: Importance.high,
       playSound: true,
     );

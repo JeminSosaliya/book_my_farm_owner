@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'dart:convert';
 import '../../main.dart';
 import '../models/booking.dart';
-import '../config/api_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingProvider with ChangeNotifier {
@@ -61,7 +61,7 @@ class BookingProvider with ChangeNotifier {
     });
 
     try {
-      final token = await getToken();
+      final String? token = await getToken();
       final queryParams = {
         'page': page.toString(),
         'limit': '10',
@@ -80,10 +80,10 @@ class BookingProvider with ChangeNotifier {
         _statusFilter = status;
       }
 
-      final uri = Uri.parse('$baseUrlGlobal/dashboard/bookings')
+      final Uri uri = Uri.parse('$baseUrlGlobal/dashboard/bookings')
           .replace(queryParameters: queryParams);
 
-      final response = await http.get(
+      final Response response = await http.get(
         uri,
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ class BookingProvider with ChangeNotifier {
         if (data['success'] == true && data['data'] != null) {
           await Future.microtask(() {
             _bookings = (data['data']['bookings'] as List)
-                .map((json) => Booking.fromJson(json))
+                .map((dynamic json) => Booking.fromJson(json))
                 .toList();
             _currentPage = data['data']['pagination']['page'];
             _totalPages = data['data']['pagination']['pages'];
@@ -162,11 +162,10 @@ class BookingProvider with ChangeNotifier {
     });
 
     try {
-      final token = await getToken();
-      final uri =
-          Uri.parse('$baseUrlGlobal/dashboard/bookings/$bookingId');
+      final String? token = await getToken();
+      final Uri uri = Uri.parse('$baseUrlGlobal/dashboard/bookings/$bookingId');
 
-      final response = await http.get(
+      final Response response = await http.get(
         uri,
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +178,7 @@ class BookingProvider with ChangeNotifier {
       log("Booking Provider Details ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final dynamic data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
           await Future.microtask(() {
             _selectedBooking = Booking.fromJson(data['data']);
