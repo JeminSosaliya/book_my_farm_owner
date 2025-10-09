@@ -54,25 +54,34 @@ class BlockedDatesProvider with ChangeNotifier {
   }
 
   Future<void> fetchBlockedDates(
-    String farmhouseId, {
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
+      String farmhouseId, {
+        DateTime? startDate,
+        DateTime? endDate,
+      }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
+    print("🚀 Fetching blocked dates for farmhouse: $farmhouseId");
+
     try {
       final String? token = await getToken();
+      print("🔑 Token status: ${token != null ? '✅ Available' : '❌ Missing'}");
+
       final Map<String, dynamic> queryParams = {
         if (startDate != null)
           'startDate': startDate.toIso8601String().split('T')[0],
-        if (endDate != null) 'endDate': endDate.toIso8601String().split('T')[0],
+        if (endDate != null)
+          'endDate': endDate.toIso8601String().split('T')[0],
       };
+
+      print("📅 Query Params: $queryParams");
 
       final Uri uri = Uri.parse(
         '$baseUrlGlobal/dashboard/farm-houses/$farmhouseId/blocked-dates',
       ).replace(queryParameters: queryParams);
-      log("🔗 Blocked Dates URL: $uri");
+
+      print("🌐 API Endpoint: $uri");
 
       final Response response = await http.get(
         uri,
@@ -82,82 +91,92 @@ class BlockedDatesProvider with ChangeNotifier {
         },
       );
 
-      List<String> getDatesBetween(DateTime start, DateTime end) {
-        final List<String> dates = [];
-        DateTime current = start;
-        while (!current.isAfter(end)) {
-          dates.add(current.toIso8601String().split('T')[0]);
-          current = current.add(Duration(days: 1));
-        }
-        return dates;
-      }
-
-      log("📡 Response Code: ${response.statusCode}");
-      log("📄 Response Body: ${response.body}");
+      print("📡 Response Status: ${response.statusCode}");
+      log("📨 Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final dynamic data = json.decode(response.body);
+
         if (data['success'] == true && data['data'] is List) {
           final List<dynamic> dataList = data['data'];
+          print("✅ API Success: Received ${dataList.length} blocked records");
+
           _blockedDates = dataList.map((item) {
-            final List<DateTime> parsedDate = (item["dates"] as List<dynamic>)
-                .map((e) => DateTime.parse(e))
-                .toList();
-            final List<String> dates =
-                getDatesBetween(parsedDate.first, parsedDate.last);
+            final List<String> nights = (item['dates'] as List<dynamic>)
+                .map((e) => DateTime.parse(e.toString()))
+                .map((d) => d.toIso8601String().split('T')[0])
+                .toList()
+              ..sort();
+
+            print("📦 Processed blocked entry: ${item['_id']} with ${nights.length} nights");
+
             return BlockedDate(
               id: item['_id'] ?? '',
               farmId: item['farmId'] ?? '',
               farmName: item['farmName'] ?? '',
-              dates: dates,
+              dates: nights,
               reason: item['reason'] ?? '',
               createdBy: item['createdBy'] ?? '',
               createdAt: DateTime.parse(item['createdAt']),
               updatedAt: DateTime.parse(item['updatedAt']),
             );
           }).toList();
+
           _isLoading = false;
           _error = null;
           notifyListeners();
+
+          print("🎉 Successfully updated local blockedDates list (${_blockedDates.length} entries)");
         } else {
+          print("⚠️ Unexpected API response structure: $data");
           throw Exception('Invalid response format');
         }
       } else {
-        throw Exception(
-            '❌ Failed to fetch blocked dates: ${response.statusCode}');
+        print("❌ Server responded with status: ${response.statusCode}");
+        throw Exception('Failed to fetch blocked dates: ${response.statusCode}');
       }
     } catch (e) {
       _error = '❗ Error fetching blocked dates: $e';
       _isLoading = false;
       notifyListeners();
+
+      print("💥 Exception occurred while fetching blocked dates: $e");
+    } finally {
+      print("🏁 Fetch blocked dates completed for farmhouse: $farmhouseId\n");
     }
   }
 
   Future<bool> blockDates(
-    String farmhouseId,
-    List<String> dates,
-    String reason,
-  ) async {
+      String farmhouseId,
+      List<String> dates,
+      String reason,
+      ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    try {
-      final List<String> datesToBlock =
-          dates.length > 1 ? dates.sublist(0, dates.length - 1) : dates;
 
+    print("🚀 Starting to block dates for farmhouse: $farmhouseId");
+    print("📅 Dates to block (nights only): $dates");
+    print("📝 Reason: $reason");
+
+    try {
+      final List<String> nightsToBlock = dates;
       final String? token = await getToken();
+
+      print("🔑 Retrieved token: ${token != null ? '✅ Available' : '❌ Missing'}");
+
       final String url =
           '$baseUrlGlobal/dashboard/farm-houses/$farmhouseId/blocked-dates';
       final Map<String, dynamic> requestBody = {
         'farmId': farmhouseId,
-        'dates': datesToBlock,
+        'dates': nightsToBlock,
         'reason': reason,
       };
-      print("Base URL :- $url");
-      print("Request Body :- $requestBody");
+
+      print("🌐 API Endpoint: $url");
+      print("📦 Request Body: $requestBody");
+
       final Uri uri = Uri.parse(url);
-      print(
-          "id is $farmhouseId dates is $datesToBlock (excluding checkout date) and reason is $reason and token is $token");
       final Response response = await http.post(
         uri,
         headers: {
@@ -166,16 +185,21 @@ class BlockedDatesProvider with ChangeNotifier {
         },
         body: json.encode(requestBody),
       );
+
+      print("📡 Response Status: ${response.statusCode}");
+      print("📨 Response Body: ${response.body}");
+
       final dynamic data = json.decode(response.body);
-      print(
-          "data post $data and ${response.statusCode} and body is ${response.body} ");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
+        print("✅ Successfully blocked dates for farmhouse: $farmhouseId");
+
         _blockedDates.add(
           BlockedDate(
             id: data['_id'] ?? '',
             farmId: farmhouseId,
             farmName: data['farmName'] ?? '',
-            dates: datesToBlock,
+            dates: nightsToBlock,
             reason: reason,
             createdBy: data['createdBy'] ?? '',
             createdAt: DateTime.parse(
@@ -186,29 +210,38 @@ class BlockedDatesProvider with ChangeNotifier {
             ),
           ),
         );
+
         _isLoading = false;
         _selectedDates = [];
         _selectedReason = null;
         notifyListeners();
+
+        print("🎉 Blocked dates added locally & state updated successfully!");
         return true;
       } else {
-        print("error is ${data["message"]} and success is ${data["success"]}");
         _error = data['message'] ??
             data['error'] ??
             data['errors']?.toString() ??
             'Failed to block dates (Status: ${response.statusCode})';
-        print("error is $_error");
+
+        print("⚠️ Failed to block dates → Error: $_error");
+
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      _error = 'Network error: ${e.toString()}';
+      _error = '💥 Network error: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
+
+      print("💣 Exception occurred while blocking dates: $e");
       return false;
+    } finally {
+      print("🏁 Block date request completed for farmhouse: $farmhouseId\n");
     }
   }
+
 
   void setSelectedReason(String? reason) {
     _selectedReason = reason;

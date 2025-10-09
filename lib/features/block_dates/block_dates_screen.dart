@@ -1,10 +1,11 @@
 import 'package:book_my_farm_owner/core/models/blocked_date.dart';
 import 'package:book_my_farm_owner/core/models/farm_house.dart';
 import 'package:book_my_farm_owner/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';
+
 import '../../core/providers/blocked_dates_provider.dart';
 import '../../core/theme/app_colors.dart';
 
@@ -75,18 +76,25 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
     if (provider.selectedDates.isEmpty) {
       return const SizedBox.shrink();
     }
-    final List<DateTime> sortedDates = provider.selectedDates
-        .map((String date) => DateTime.parse(date))
+
+    final List<DateTime> nights = provider.selectedDates
+        .map((s) => DateTime.parse(s))
+        .map((d) => DateTime(d.year, d.month, d.day))
         .toList()
       ..sort();
-    final DateTime startDate = sortedDates.first;
-    final DateTime endDate = sortedDates.last;
+
+    final DateTime checkIn = nights.first;
+    final DateTime checkOut =
+        DateTime(nights.last.year, nights.last.month, nights.last.day)
+            .add(const Duration(days: 1)); // end-exclusive
+
     final String checkInTime = widget.timings.checkIn.isNotEmpty
         ? _formatTime(_parseTime(widget.timings.checkIn))
         : 'N/A';
     final String checkOutTime = widget.timings.checkOut.isNotEmpty
         ? _formatTime(_parseTime(widget.timings.checkOut))
         : 'N/A';
+
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -115,14 +123,12 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.grey),
-                onPressed: () {
-                  _selectDateRange(context);
-                },
+                onPressed: () => _selectDateRange(context),
               ),
             ],
           ),
           Text(
-            '${DateFormat('MMM dd, yyyy').format(startDate)} ($checkInTime) to ${DateFormat('MMM dd, yyyy').format(endDate)} ($checkOutTime)',
+            '${DateFormat('MMM dd, yyyy').format(checkIn)} ($checkInTime) to ${DateFormat('MMM dd, yyyy').format(checkOut)} ($checkOutTime)',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w500,
@@ -131,7 +137,7 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Note: Checkout date (${DateFormat('MMM dd, yyyy').format(endDate)}) will remain available for new bookings.',
+            'Note: Checkout date (${DateFormat('MMM dd, yyyy').format(checkOut)}) will remain available for new bookings.',
             style: TextStyle(
               fontSize: 12.sp,
               fontStyle: FontStyle.italic,
@@ -143,26 +149,46 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
     );
   }
 
+  DateTime _asDate(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  List<DateTime> _nightsInRange(DateTime checkIn, DateTime checkOut) {
+    final List<DateTime> nights = [];
+    for (DateTime d = _asDate(checkIn);
+        d.isBefore(_asDate(checkOut));
+        d = d.add(const Duration(days: 1))) {
+      nights.add(d);
+    }
+    return nights;
+  }
+
+  bool _isRangeAvailableForBooking(
+      DateTime start, DateTime end, Set<DateTime> blockedSet) {
+    if (!_asDate(start).isBefore(_asDate(end)))
+      return false; // at least 1 night
+    for (final night in _nightsInRange(start, end)) {
+      if (blockedSet.contains(_asDate(night))) return false;
+    }
+    return true;
+  }
+
   Future<void> _selectDateRange(BuildContext context) async {
     final BlockedDatesProvider provider = context.read<BlockedDatesProvider>();
 
-    // Fetch blocked dates from provider
-    final List<DateTime> blockedDates = provider.blockedDates
-        .expand((BlockedDate blocked) =>
-            blocked.dates.map((String date) => DateTime.parse(date)))
-        .map((DateTime date) => DateTime(date.year, date.month, date.day))
-        .toList();
+    final Set<DateTime> blockedSet = provider.blockedDates
+        .expand((BlockedDate b) => b.dates.map((s) => DateTime.parse(s)))
+        .map(_asDate)
+        .toSet();
 
-    // Get currently selected dates for initial range
     DateTimeRange? initialRange;
     if (provider.selectedDates.isNotEmpty) {
-      final List<DateTime> sortedDates = provider.selectedDates
+      final List<DateTime> nights = provider.selectedDates
           .map((String date) => DateTime.parse(date))
+          .map(_asDate)
           .toList()
         ..sort();
       initialRange = DateTimeRange(
-        start: sortedDates.first,
-        end: sortedDates.last,
+        start: nights.first,
+        end: nights.last.add(const Duration(days: 1)), // end exclusive
       );
     }
 
@@ -172,81 +198,84 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
       lastDate: DateTime(2100),
       initialDateRange: initialRange,
       selectableDayPredicate: (DateTime date, DateTime? start, DateTime? end) {
-        final DateTime normalizedDate =
-            DateTime(date.year, date.month, date.day);
-        final DateTime today = DateTime.now();
-        final DateTime todayNormalized =
-            DateTime(today.year, today.month, today.day);
-        // Disable past dates
-        if (normalizedDate.isBefore(todayNormalized)) {
-          return false;
+        final DateTime d = _asDate(date);
+        final DateTime today = _asDate(DateTime.now());
+        if (d.isBefore(today)) return false;
+
+        if (start == null || end != null) {
+          return !blockedSet.contains(d); // start must be on a free night
         }
-        // Block dates that are already in the blocked list
-        if (blockedDates.contains(normalizedDate)) {
-          return false;
+
+        final DateTime s = _asDate(start);
+
+        if (d.isBefore(s) || d.isAtSameMomentAs(s)) {
+          return !blockedSet.contains(d);
         }
-        // Allow all other dates
-        return true;
+
+        return _isRangeAvailableForBooking(s, d, blockedSet);
       },
     );
 
     if (picked != null) {
-      final DateTime startDate = picked.start;
-      final DateTime endDate = picked.end;
+      final DateTime checkIn = _asDate(picked.start);
+      final DateTime checkOut = _asDate(picked.end);
 
       provider.clearSelection();
 
-      // Include the end date in the range for display purposes
-      final int nights = endDate.difference(startDate).inDays + 1;
-
-      for (int i = 0; i < nights; i++) {
-        final DateTime date = startDate.add(Duration(days: i));
-        provider.addSelectedDate(DateFormat('yyyy-MM-dd').format(date));
+      final nights = _nightsInRange(checkIn, checkOut);
+      for (final n in nights) {
+        provider.addSelectedDate(DateFormat('yyyy-MM-dd').format(n));
       }
 
       showDialog(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(LocaleKeys.blocked_date_range.tr()),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  LocaleKeys
-                      .you_have_blocked_the_following_date_and_time_range_com
-                      .tr(),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${DateFormat('MMM dd, yyyy').format(startDate)} (${_formatTime(_parseTime(widget.timings.checkIn))}) to ${DateFormat('MMM dd, yyyy').format(endDate)} (${_formatTime(_parseTime(widget.timings.checkOut))})',
-                  style: TextStyle(
+        builder: (_) => AlertDialog(
+          title: Text(LocaleKeys.blocked_date_range.tr()),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(LocaleKeys
+                  .you_have_blocked_the_following_date_and_time_range_com
+                  .tr()),
+              const SizedBox(height: 8),
+              Text(
+                '${DateFormat('MMM dd, yyyy').format(checkIn)} (${_formatTime(_parseTime(widget.timings.checkIn))})'
+                ' to '
+                '${DateFormat('MMM dd, yyyy').format(checkOut)} (${_formatTime(_parseTime(widget.timings.checkOut))})',
+                style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Note: Checkout date (${DateFormat('MMM dd, yyyy').format(endDate)}) will remain available for new bookings.',
-                  style: TextStyle(
+                    color: AppColors.primaryColor),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Note: Only overnight stay dates will be blocked. Checkout date remains available.',
+                style: TextStyle(
                     fontSize: 14,
                     fontStyle: FontStyle.italic,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(LocaleKeys.ok.tr()),
+                    color: Colors.grey[600]),
               ),
             ],
-          );
-        },
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(LocaleKeys.ok.tr())),
+          ],
+        ),
       );
     }
+  }
+
+  String _formatDateRange(List<String> dates) {
+    if (dates.isEmpty) return '';
+    final List<DateTime> nights =
+        dates.map((s) => DateTime.parse(s)).map(_asDate).toList()..sort();
+    final DateTime checkIn = nights.first;
+    final DateTime checkOut = nights.last.add(const Duration(days: 1));
+    final String start = DateFormat('MMM dd, yyyy').format(checkIn);
+    final String end = DateFormat('MMM dd, yyyy').format(checkOut);
+    return '$start to $end';
   }
 
   Future<void> _selectReason(BuildContext context) async {
@@ -385,15 +414,6 @@ class _BlockDatesScreenState extends State<BlockDatesScreen> {
         );
       },
     );
-  }
-
-  String _formatDateRange(List<String> dates) {
-    if (dates.isEmpty) return '';
-    final List<DateTime> sortedDates = dates.map(DateTime.parse).toList()
-      ..sort();
-    final String start = DateFormat('MMM dd, yyyy').format(sortedDates.first);
-    final String end = DateFormat('MMM dd, yyyy').format(sortedDates.last);
-    return start == end ? start : '$start to $end';
   }
 
   @override
