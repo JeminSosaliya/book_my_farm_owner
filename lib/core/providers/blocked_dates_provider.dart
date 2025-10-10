@@ -54,10 +54,10 @@ class BlockedDatesProvider with ChangeNotifier {
   }
 
   Future<void> fetchBlockedDates(
-      String farmhouseId, {
-        DateTime? startDate,
-        DateTime? endDate,
-      }) async {
+    String farmhouseId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -71,8 +71,7 @@ class BlockedDatesProvider with ChangeNotifier {
       final Map<String, dynamic> queryParams = {
         if (startDate != null)
           'startDate': startDate.toIso8601String().split('T')[0],
-        if (endDate != null)
-          'endDate': endDate.toIso8601String().split('T')[0],
+        if (endDate != null) 'endDate': endDate.toIso8601String().split('T')[0],
       };
 
       print("📅 Query Params: $queryParams");
@@ -97,28 +96,36 @@ class BlockedDatesProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final dynamic data = json.decode(response.body);
 
-        if (data['success'] == true && data['data'] is List) {
-          final List<dynamic> dataList = data['data'];
+        if (data['success'] == true && data['data']["blockedDates"] is List) {
+          final List<dynamic> dataList = data['data']["blockedDates"];
           print("✅ API Success: Received ${dataList.length} blocked records");
 
           _blockedDates = dataList.map((item) {
-            final List<String> nights = (item['dates'] as List<dynamic>)
-                .map((e) => DateTime.parse(e.toString()))
-                .map((d) => d.toIso8601String().split('T')[0])
-                .toList()
-              ..sort();
+            // final List<String> nights = (item['dates'] as List<dynamic>)
+            //     .map((e) => DateTime.parse(e.toString()))
+            //     .map((d) => d.toIso8601String().split('T')[0])
+            //     .toList()
+            //   ..sort();
+            String date = item['date']??"";
+            if(date.isNotEmpty){
+              date = DateTime.parse(date).toIso8601String().split('T')[0];
+            }
 
-            print("📦 Processed blocked entry: ${item['_id']} with ${nights.length} nights");
+            // print(
+            //     "📦 Processed blocked entry: ${item['_id']} with ${nights.length} nights");
 
             return BlockedDate(
               id: item['_id'] ?? '',
               farmId: item['farmId'] ?? '',
               farmName: item['farmName'] ?? '',
-              dates: nights,
+              // dates: nights,
+              dates: [date],
               reason: item['reason'] ?? '',
               createdBy: item['createdBy'] ?? '',
-              createdAt: DateTime.parse(item['createdAt']),
-              updatedAt: DateTime.parse(item['updatedAt']),
+              createdAt:
+                  DateTime.tryParse(item['createdAt'] ?? '') ?? DateTime.now(),
+              updatedAt:
+                  DateTime.tryParse(item['updatedAt'] ?? '') ?? DateTime.now(),
             );
           }).toList();
 
@@ -126,14 +133,16 @@ class BlockedDatesProvider with ChangeNotifier {
           _error = null;
           notifyListeners();
 
-          print("🎉 Successfully updated local blockedDates list (${_blockedDates.length} entries)");
+          print(
+              "🎉 Successfully updated local blockedDates list (${_blockedDates.length} entries)");
         } else {
           print("⚠️ Unexpected API response structure: $data");
           throw Exception('Invalid response format');
         }
       } else {
         print("❌ Server responded with status: ${response.statusCode}");
-        throw Exception('Failed to fetch blocked dates: ${response.statusCode}');
+        throw Exception(
+            'Failed to fetch blocked dates: ${response.statusCode}');
       }
     } catch (e) {
       _error = '❗ Error fetching blocked dates: $e';
@@ -147,10 +156,10 @@ class BlockedDatesProvider with ChangeNotifier {
   }
 
   Future<bool> blockDates(
-      String farmhouseId,
-      List<String> dates,
-      String reason,
-      ) async {
+    String farmhouseId,
+    List<String> dates,
+    String reason,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -163,7 +172,8 @@ class BlockedDatesProvider with ChangeNotifier {
       final List<String> nightsToBlock = dates;
       final String? token = await getToken();
 
-      print("🔑 Retrieved token: ${token != null ? '✅ Available' : '❌ Missing'}");
+      print(
+          "🔑 Retrieved token: ${token != null ? '✅ Available' : '❌ Missing'}");
 
       final String url =
           '$baseUrlGlobal/dashboard/farm-houses/$farmhouseId/blocked-dates';
@@ -241,7 +251,6 @@ class BlockedDatesProvider with ChangeNotifier {
       print("🏁 Block date request completed for farmhouse: $farmhouseId\n");
     }
   }
-
 
   void setSelectedReason(String? reason) {
     _selectedReason = reason;
