@@ -8,7 +8,15 @@ import '../../core/theme/app_colors.dart';
 import 'booking_details_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
-  const BookingsScreen({super.key});
+  final String farmId;
+  final String checkIn;
+  final String checkOut;
+
+  const BookingsScreen(
+      {super.key,
+      required this.farmId,
+      required this.checkIn,
+      required this.checkOut});
 
   @override
   State<BookingsScreen> createState() => _BookingsScreenState();
@@ -23,8 +31,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   Future<void> _loadBookings() async {
     if (!mounted) return;
-    final bookingProvider = context.read<BookingProvider>();
-    await bookingProvider.fetchBookings();
+    final BookingProvider bookingProvider = context.read<BookingProvider>();
+    await bookingProvider.fetchBookings(
+      farmId: widget.farmId,
+    );
   }
 
   Future<void> _selectDateRange(BuildContext context) async {
@@ -46,6 +56,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         startDate: picked.start,
         endDate: picked.end,
         status: bookingProvider.statusFilter,
+        farmId: widget.farmId,
       );
     }
   }
@@ -53,10 +64,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
   Future<void> _selectStatus(BuildContext context) async {
     final BookingProvider bookingProvider = context.read<BookingProvider>();
     final List<String> statuses = [
-      LocaleKeys.pending.tr(),
+      // LocaleKeys.pending.tr(),
       LocaleKeys.confirmed.tr(),
       LocaleKeys.completed.tr(),
-      LocaleKeys.cancelled.tr(),
+      // LocaleKeys.cancelled.tr(),
     ];
 
     await showModalBottomSheet(
@@ -74,31 +85,36 @@ class _BookingsScreenState extends State<BookingsScreen> {
               ),
             ),
             SizedBox(height: 16.h),
-            ...statuses.map((status) => ListTile(
-                  title: Text(
-                    status.toUpperCase(),
-                    style: TextStyle(
-                      color: bookingProvider.statusFilter == status
-                          ? AppColors.primaryColor
-                          : AppColors.textColor,
-                    ),
+            ...statuses.map(
+              (String status) => ListTile(
+                title: Text(
+                  status.toUpperCase(),
+                  style: TextStyle(
+                    color: bookingProvider.statusFilter == status
+                        ? AppColors.primaryColor
+                        : AppColors.textColor,
                   ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await bookingProvider.fetchBookings(
-                      startDate: bookingProvider.startDate,
-                      endDate: bookingProvider.endDate,
-                      status: status,
-                    );
-                  },
-                )),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await bookingProvider.fetchBookings(
+                    startDate: bookingProvider.startDate,
+                    endDate: bookingProvider.endDate,
+                    status: status,
+                    farmId: widget.farmId,
+                  );
+                },
+              ),
+            ),
             ListTile(
               title: Text(LocaleKeys.clear_filter.tr()),
               textColor: AppColors.errorColor,
               onTap: () async {
                 Navigator.pop(context);
                 bookingProvider.clearFilters();
-                await bookingProvider.fetchBookings();
+                await bookingProvider.fetchBookings(
+                  farmId: widget.farmId,
+                );
               },
             ),
           ],
@@ -222,32 +238,32 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       ),
                     ],
                   ),
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.r, vertical: 6.r),
-                    decoration: BoxDecoration(
-                      color: booking.payment.paymentStatus == 'completed'
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(
-                        color: booking.payment.paymentStatus == 'completed'
-                            ? Colors.green
-                            : Colors.orange,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      booking.payment.paymentStatus.toUpperCase(),
-                      style: TextStyle(
-                        color: booking.payment.paymentStatus == 'completed'
-                            ? Colors.green
-                            : Colors.orange,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   padding:
+                  //       EdgeInsets.symmetric(horizontal: 12.r, vertical: 6.r),
+                  //   decoration: BoxDecoration(
+                  //     color: booking.payment.paymentStatus == 'completed'
+                  //         ? Colors.green.withOpacity(0.1)
+                  //         : Colors.orange.withOpacity(0.1),
+                  //     borderRadius: BorderRadius.circular(20.r),
+                  //     border: Border.all(
+                  //       color: booking.payment.paymentStatus == 'completed'
+                  //           ? Colors.green
+                  //           : Colors.orange,
+                  //       width: 1,
+                  //     ),
+                  //   ),
+                  //   child: Text(
+                  //     booking.payment.paymentStatus.toUpperCase(),
+                  //     style: TextStyle(
+                  //       color: booking.payment.paymentStatus == 'completed'
+                  //           ? Colors.green
+                  //           : Colors.orange,
+                  //       fontSize: 12.sp,
+                  //       fontWeight: FontWeight.bold,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ],
@@ -306,7 +322,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     icon: const Icon(Icons.clear),
                     onPressed: () async {
                       bookingProvider.clearFilters();
-                      await bookingProvider.fetchBookings();
+                      await bookingProvider.fetchBookings(
+                        farmId: widget.farmId,
+                      );
                     },
                   ),
               ],
@@ -357,7 +375,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 onRefresh: _loadBookings,
                 child: ListView.builder(
                   itemCount: bookingProvider.bookings.length,
-                  itemBuilder: (BuildContext context,int index) =>
+                  itemBuilder: (BuildContext context, int index) =>
                       _buildBookingCard(bookingProvider.bookings[index]),
                 ),
               ),
@@ -380,7 +398,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 children: [
                   TextButton(
                     onPressed: bookingProvider.hasPrevPage
-                        ? () => bookingProvider.previousPage()
+                        ? () => bookingProvider.previousPage(
+                              farmId: widget.farmId,
+                            )
                         : null,
                     child: Text(LocaleKeys.previous.tr()),
                   ),
@@ -393,7 +413,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   ),
                   TextButton(
                     onPressed: bookingProvider.hasNextPage
-                        ? () => bookingProvider.nextPage()
+                        ? () => bookingProvider.nextPage(
+                              farmId: widget.farmId,
+                            )
                         : null,
                     child: Text(LocaleKeys.next.tr()),
                   ),

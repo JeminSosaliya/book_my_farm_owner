@@ -116,8 +116,13 @@ class MyApp extends StatelessWidget {
                     builder: (BuildContext _) => const DashboardScreen(),
                   );
                 case '/bookings':
+                  Map? args = settings.arguments as Map<String, dynamic>?;
                   return MaterialPageRoute(
-                    builder: (BuildContext _) => const BookingsScreen(),
+                    builder: (BuildContext _) => BookingsScreen(
+                      farmId: args?['farmhouseid'] ?? "",
+                      checkIn: args?['checkIn'] ?? "",
+                      checkOut: args?['checkOut'] ?? "",
+                    ),
                   );
                 case '/block-dates':
                   Map? args = settings.arguments as Map<String, dynamic>?;

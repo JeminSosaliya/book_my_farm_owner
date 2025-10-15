@@ -172,17 +172,17 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             LocaleKeys.remaining_amount.tr(),
             '₹${booking?.payment.remainingAmount ?? 0}',
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                LocaleKeys.payment_status.tr(),
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
-              ),
-              _buildStatusChip(booking?.payment.paymentStatus ?? ""),
-            ],
-          ),
-          SizedBox(height: 8.h),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     Text(
+          //       LocaleKeys.payment_status.tr(),
+          //       style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+          //     ),
+          //     _buildStatusChip(booking?.payment.paymentStatus ?? ""),
+          //   ],
+          // ),
+          // SizedBox(height: 8.h),
           _buildInfoRow(
             LocaleKeys.payment_method.tr(),
             (booking?.payment.paymentMethod ?? "").toUpperCase(),

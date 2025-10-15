@@ -27,7 +27,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadProfile() async {
     if (!mounted) return;
-
     final profileProvider = context.read<ProfileProvider>();
     if (!profileProvider.hasProfile && !profileProvider.isLoading) {
       await profileProvider.loadProfile();
@@ -552,8 +551,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       _buildInfoChip(
                         icon: Icons.bed,
-                        text: LocaleKeys.value_bedrooms
-                            .tr(args: ["${farm.basicInfo.bedrooms+farm.basicInfo.acBedroom}"]),
+                        text: LocaleKeys.value_bedrooms.tr(args: [
+                          "${farm.basicInfo.bedrooms + farm.basicInfo.acBedroom}"
+                        ]),
                       ),
                       _buildInfoChip(
                         icon: Icons.area_chart,
@@ -569,8 +569,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: _buildActionButton(
                           icon: Icons.access_alarm,
                           label: LocaleKeys.bookings.tr(),
-                          onTap: () =>
-                              Navigator.pushNamed(context, '/bookings'),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            '/bookings',
+                            arguments: {
+                              "farmhouseid": farm.farmhouseId,
+                              "checkIn": farm.timings.checkIn,
+                              "checkOut": farm.timings.checkOut,
+                            },
+                          ),
                         ),
                       ),
                       SizedBox(width: 12.w),
@@ -585,7 +592,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               "farmhouseid": farm.id,
                               "farmName": farm.basicInfo.name,
                               "timings": farm.timings.toJson(),
-                              // Convert Timings object to Map},
                             },
                           ),
                         ),
@@ -789,13 +795,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: Text(LocaleKeys.profile.tr()),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.person),
+            //   title: Text(LocaleKeys.profile.tr()),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //   },
+            // ),
             ListTile(
               leading: const Icon(Icons.language),
               title: Text(LocaleKeys.language.tr()),

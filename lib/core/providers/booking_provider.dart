@@ -53,6 +53,7 @@ class BookingProvider with ChangeNotifier {
     DateTime? endDate,
     String? status,
     int page = 1,
+    required String farmId,
   }) async {
     await Future.microtask(() {
       _isLoading = true;
@@ -80,9 +81,9 @@ class BookingProvider with ChangeNotifier {
         _statusFilter = status;
       }
 
-      final Uri uri = Uri.parse('$baseUrlGlobal/dashboard/bookings')
+      String url = '$baseUrlGlobal/dashboard/farm-houses/$farmId/bookings';
+      final Uri uri = Uri.parse(url)
           .replace(queryParameters: queryParams);
-
       final Response response = await http.get(
         uri,
         headers: {
@@ -91,7 +92,8 @@ class BookingProvider with ChangeNotifier {
         },
       );
 
-      log("Bookings Url :- $baseUrlGlobal/dashboard/bookings");
+      log("Bookings Url :- $url");
+      log("Bookings Query Params :- $queryParams");
       log("booking provider ${response.statusCode}");
       log("booking provider ${response.body}");
 
@@ -125,24 +127,26 @@ class BookingProvider with ChangeNotifier {
     }
   }
 
-  Future<void> nextPage() async {
+  Future<void> nextPage({required String farmId}) async {
     if (_hasNextPage) {
       await fetchBookings(
         startDate: _startDate,
         endDate: _endDate,
         status: _statusFilter,
         page: _currentPage + 1,
+        farmId: farmId,
       );
     }
   }
 
-  Future<void> previousPage() async {
+  Future<void> previousPage({required String farmId}) async {
     if (_hasPrevPage) {
       await fetchBookings(
         startDate: _startDate,
         endDate: _endDate,
         status: _statusFilter,
         page: _currentPage - 1,
+        farmId: farmId,
       );
     }
   }

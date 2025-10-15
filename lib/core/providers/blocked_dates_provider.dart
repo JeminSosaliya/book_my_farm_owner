@@ -61,9 +61,7 @@ class BlockedDatesProvider with ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
-
     print("🚀 Fetching blocked dates for farmhouse: $farmhouseId");
-
     try {
       final String? token = await getToken();
       print("🔑 Token status: ${token != null ? '✅ Available' : '❌ Missing'}");
