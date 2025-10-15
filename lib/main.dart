@@ -24,6 +24,9 @@ import 'firebase.dart';
 
 String baseUrlGlobal = "";
 
+// Global navigator key for navigation from services
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (message.notification != null) {
@@ -93,6 +96,7 @@ class MyApp extends StatelessWidget {
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
+            navigatorKey: navigatorKey,
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {
               switch (settings.name) {

@@ -4,13 +4,13 @@ import 'dart:developer';
 import 'package:book_my_farm_owner/core/models/farm_house.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../generated/locale_keys.g.dart';
 import '../../main.dart';
 import '../models/blocked_date.dart';
+import '../services/http_service.dart';
 
 class BlockedDatesProvider with ChangeNotifier {
   List<BlockedDate> _blockedDates = [];
@@ -63,9 +63,6 @@ class BlockedDatesProvider with ChangeNotifier {
     notifyListeners();
     print("🚀 Fetching blocked dates for farmhouse: $farmhouseId");
     try {
-      final String? token = await getToken();
-      print("🔑 Token status: ${token != null ? '✅ Available' : '❌ Missing'}");
-
       final Map<String, dynamic> queryParams = {
         if (startDate != null)
           'startDate': startDate.toIso8601String().split('T')[0],
@@ -80,13 +77,8 @@ class BlockedDatesProvider with ChangeNotifier {
 
       print("🌐 API Endpoint: $uri");
 
-      final Response response = await http.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final Response response =
+          await HttpService().authenticatedGet(uri.toString());
 
       print("📡 Response Status: ${response.statusCode}");
       log("📨 Response Body: ${response.body}");
@@ -104,8 +96,8 @@ class BlockedDatesProvider with ChangeNotifier {
             //     .map((d) => d.toIso8601String().split('T')[0])
             //     .toList()
             //   ..sort();
-            String date = item['date']??"";
-            if(date.isNotEmpty){
+            String date = item['date'] ?? "";
+            if (date.isNotEmpty) {
               date = DateTime.parse(date).toIso8601String().split('T')[0];
             }
 
@@ -168,10 +160,6 @@ class BlockedDatesProvider with ChangeNotifier {
 
     try {
       final List<String> nightsToBlock = dates;
-      final String? token = await getToken();
-
-      print(
-          "🔑 Retrieved token: ${token != null ? '✅ Available' : '❌ Missing'}");
 
       final String url =
           '$baseUrlGlobal/dashboard/farm-houses/$farmhouseId/blocked-dates';
@@ -184,14 +172,9 @@ class BlockedDatesProvider with ChangeNotifier {
       print("🌐 API Endpoint: $url");
       print("📦 Request Body: $requestBody");
 
-      final Uri uri = Uri.parse(url);
-      final Response response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode(requestBody),
+      final Response response = await HttpService().authenticatedPost(
+        url,
+        body: requestBody,
       );
 
       print("📡 Response Status: ${response.statusCode}");

@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'dart:convert';
 import '../../main.dart';
 import '../models/booking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/http_service.dart';
 
 class BookingProvider with ChangeNotifier {
   List<Booking> _bookings = [];
@@ -62,7 +62,6 @@ class BookingProvider with ChangeNotifier {
     });
 
     try {
-      final String? token = await getToken();
       final queryParams = {
         'page': page.toString(),
         'limit': '10',
@@ -82,15 +81,9 @@ class BookingProvider with ChangeNotifier {
       }
 
       String url = '$baseUrlGlobal/dashboard/farm-houses/$farmId/bookings';
-      final Uri uri = Uri.parse(url)
-          .replace(queryParameters: queryParams);
-      final Response response = await http.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final Uri uri = Uri.parse(url).replace(queryParameters: queryParams);
+      final Response response =
+          await HttpService().authenticatedGet(uri.toString());
 
       log("Bookings Url :- $url");
       log("Bookings Query Params :- $queryParams");
@@ -166,15 +159,8 @@ class BookingProvider with ChangeNotifier {
     });
 
     try {
-      final String? token = await getToken();
-      final Uri uri = Uri.parse('$baseUrlGlobal/dashboard/bookings/$bookingId');
-
-      final Response response = await http.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+      final Response response = await HttpService().authenticatedGet(
+        '$baseUrlGlobal/dashboard/bookings/$bookingId',
       );
 
       log("Single Booking Details Url :- $baseUrlGlobal/dashboard/bookings/$bookingId");

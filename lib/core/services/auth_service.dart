@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:book_my_farm_owner/main.dart';
-import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'http_service.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';
@@ -15,10 +15,9 @@ class AuthService {
 
   Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
     try {
-      final Response response = await http.post(
-        Uri.parse('$baseUrlGlobal/auth/send-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'mobileNumber': mobileNumber}),
+      final Response response = await HttpService().post(
+        '$baseUrlGlobal/auth/send-otp',
+        body: {'mobileNumber': mobileNumber},
       );
 
       log("Send Otp URL : $baseUrlGlobal/auth/send-otp");
@@ -41,14 +40,13 @@ class AuthService {
     String fcmToken,
   ) async {
     try {
-      final Response response = await http.post(
-        Uri.parse('$baseUrlGlobal/auth/verify-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final Response response = await HttpService().post(
+        '$baseUrlGlobal/auth/verify-otp',
+        body: {
           'mobileNumber': mobileNumber,
           'otp': otp,
           "fcmToken": fcmToken,
-        }),
+        },
       );
 
       log("Verify Otp URL : $baseUrlGlobal/auth/verify-otp");
@@ -110,12 +108,9 @@ class AuthService {
       }
       log("URL :- $baseUrlGlobal/dashboard/profile");
       print("getProfile: Making API call with token: $token");
-      final response = await http.get(
-        Uri.parse('$baseUrlGlobal/dashboard/profile'),
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+
+      final response = await HttpService().authenticatedGet(
+        '$baseUrlGlobal/dashboard/profile',
       );
 
       print("getProfile status code: ${response.statusCode}");
