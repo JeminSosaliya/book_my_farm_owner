@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                authProvider.error ?? LocaleKeys.failed_to_send_otp.tr(),
+                LocaleKeys.failed_to_send_otp.tr(),
               ),
               backgroundColor: AppColors.errorColor,
             ),
